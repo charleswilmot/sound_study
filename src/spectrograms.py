@@ -27,7 +27,8 @@ class Spectrogram:
         # todo: read from data
         t_max = len(self.data) * 1000 / self.frame_rate
         f_min = self.frame_rate / self._window_size
-        f_max = self.frame_rate / 2
+        # f_max = self.frame_rate / 2
+        f_max = 2000
         self._image = self._ax.imshow(
             # np.random.uniform(0, 1, size=self._resolution),
             self.analyse(0, t_max, f_min, f_max),
@@ -175,8 +176,8 @@ class DoubleFourierSpectrogram(Spectrogram):
         first = np.abs(np.matmul(W, x * self._hann_window)) # self.freq_resolution, self.time_resolution
         # W = freq_resolution, freq_resolution
         W = self.second_fourier_matrix(f_min, f_max)
-        second = np.abs(np.matmul(W, first))
-        return np.clip(second, 0, self._clip_value)
+        second = np.matmul(W, first).imag
+        return np.clip(second, -self._clip_value, self._clip_value)
 
 
 if __name__ == "__main__":
@@ -198,8 +199,7 @@ if __name__ == "__main__":
     # spect = Spectrogram(some_data)
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    window_size = int(50 * 48000 / 1000)
-    # spect = Spectrogram(ax, "../data/female_singing.wav", window_size=window_size, resolution=(2080, 720))
-    # spect = Spectrogram(ax, path, window_size=window_size, resolution=(1080, 720))
+    window_size = int(25 * 48000 / 1000)
+    # spect = Spectrogram(ax, path, window_size=window_size, resolution=(1080, 1080))
     spect = DoubleFourierSpectrogram(ax, path, window_size=window_size, resolution=(1080, 720), second_window=[50, 1000])
     plt.show()
